@@ -17,15 +17,16 @@ export default class Doggolang {
 	this.program = []
 	// Program counter
 	this.pc = 0
-	// To hold the variables
-	this.memory = []
 	// State...
 	this.state = {
 	    runStatus: STOPPED,
+	    memory: {},
 	    error: "",
 	    callStack: {},
 	    // for goto and maybe loops?
-	    labels: {}
+	    labels: {},
+	    returnValue: undefined
+	    
 	}
     }
 
@@ -38,21 +39,25 @@ export default class Doggolang {
     run(line) {
 	this.pc = line
 	this.state.runStatus = RUNNING
-	while(this.pc < this.program.length() && this.state.runStatus == RUNNING) {
-	    this.execute()
+	while(this.pc < this.program.length && this.state.runStatus == RUNNING) {
+	    this.pc = this.execute(this.pc)
 	} 
     }
     
     // Execute one line of code
-    execute() {
+    execute(pc) {	
+	// Assume we'll proceed to the next line
+	let nextLine = pc + 1
 	// Tokenize, skipping leading/trailing space
-	tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
+	let tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
 	for(let t of tokens) {
-
-	    // If we have an identifier alone on a line, it goes 
+	    
+	    
+	    // If we have an identifier alone on a line, it goes in the return value
 	    if(tokens.length == 1) {
-		
+		this.returnValue = this.state.memory[t]
 	    }
 	}
+	return nextLine
     }
 }
