@@ -1,5 +1,5 @@
 // Test cases from the original assignment
-doggoscripts = [
+let doggoscripts = [
     {
 	script:	`lassie AWOO 5
         luna AWOO 6
@@ -39,8 +39,11 @@ doggoscripts = [
 	expect: 19
     }
 ]
+
+export default doggoscripts;
+
 // The script we need to get the correct answer for
-mystery_script = `
+export let mystery_script = `
 samantha AWOO 1
 hooch AWOO 500
 einstein AWOO 10
@@ -60,3 +63,5 @@ GRRR fuji YAP 0 BOW
     fuji AWOO fuji BARK 3
 BORF
 samantha`
+
+
