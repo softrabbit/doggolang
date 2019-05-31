@@ -42,21 +42,56 @@ export default class Doggolang {
 	while(this.pc < this.program.length && this.state.runStatus == RUNNING) {
 	    this.pc = this.execute(this.pc)
 	} 
+	if(this.pc >= this.program.length) {
+	    return this.state.returnValue
+	}
     }
-    
-    // Execute one line of code
+
+    // Evaluates a math expression, in tokens. 
+    // Expressions are of the form (ident|literal) (op (ident|literal) )*
+    evaluate(tokens) {
+	console.log(tokens)
+	// One token: return the value of it, either looking it up in memory or as is 
+	if(tokens.length == 1) {
+	    let candidate = this.state.memory[tokens[0]] !== undefined ? 
+		this.state.memory[tokens[0]] : tokens[0]	    
+	    return Number(candidate) != NaN ? Number(candidate) : candidate
+	} else {
+	    switch(tokens[1]) {
+	    case "AWOO":
+		// Assignment operator
+		this.state.memory[tokens[0]] = this.evaluate(tokens.slice(2))
+		// Assignment chaining should work, too
+		return this.state.memory[tokens[0]]
+		break
+	    case "WOOF":
+		// Addition operator
+		return this.evaluate(tokens.slice(0,1)) + this.evaluate(tokens.slice(2))
+		break
+	    default:
+		console.log("Unimplemented "+ tokens[1])
+		break
+	    }
+	}
+    }
+
+    // Execute one line of code and return the address of the next one
     execute(pc) {	
 	// Assume we'll proceed to the next line
 	let nextLine = pc + 1
 	// Tokenize, skipping leading/trailing space
 	let tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
-	for(let t of tokens) {
+	if(tokens.length == 0) {
+	    return nextLine
+	}
+	// First token usually defines what is to be done
+	switch(tokens[0]) {
 	    
-	    
-	    // If we have an identifier alone on a line, it goes in the return value
-	    if(tokens.length == 1) {
-		this.returnValue = this.state.memory[t]
-	    }
+	default:
+	    // Not recognized as a reserved word, i.e. we have an identifier,
+	    // in which case we bounce off to the math expression evaluator
+	    this.state.returnValue = this.evaluate(tokens)
+	    break
 	}
 	return nextLine
     }
