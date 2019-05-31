@@ -5,7 +5,6 @@ const RUNNING = 1
 const ERRORED = 2
 const TERMINATED = 3
 
-
 // Doggolang interpreter, a pretty simplistic script runner environment
 // Assumptions so far from a quick look at the example code: 
 // - The only separator between language statements is newline
@@ -40,6 +39,9 @@ export default class Doggolang {
 	this.pc = line
 	this.state.runStatus = RUNNING
 	while(this.pc < this.program.length && this.state.runStatus == RUNNING) {
+	    if(this.trace) { 
+		console.log(this.program[this.pc])
+	    }
 	    this.pc = this.execute(this.pc)
 	} 
 	if(this.pc >= this.program.length) {
@@ -50,7 +52,7 @@ export default class Doggolang {
     // Evaluates a math expression, in tokens. 
     // Expressions are of the form (ident|literal) (op (ident|literal) )*
     evaluate(tokens) {
-	console.log(tokens)
+	// console.log(tokens)
 	// One token: return the value of it, either looking it up in memory or as is 
 	if(tokens.length == 1) {
 	    let candidate = this.state.memory[tokens[0]] !== undefined ? 
@@ -68,10 +70,32 @@ export default class Doggolang {
 		// Addition operator
 		return this.evaluate(tokens.slice(0,1)) + this.evaluate(tokens.slice(2))
 		break
+	    case "ARF":
+		// Multiplication operator
+		return this.evaluate(tokens.slice(0,1)) * this.evaluate(tokens.slice(2))
+		break
+	    case "YAP":
+		return this.evaluate(tokens.slice(0,1)) > this.evaluate(tokens.slice(2))
 	    default:
 		console.log("Unimplemented "+ tokens[1])
 		break
 	    }
+	}
+    }
+
+    // Skip lines until a desired construct comes along
+    // (used in if clauses...) and return the following adress
+    skipAhead(pc, skipTo) {
+	if(this.trace) {
+	    console.log("skipTo: "+skipTo)
+	}
+	while(pc<this.program.length) {
+	    let tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
+	    if(skipTo.includes(tokens[0])) {
+		return pc+1
+	    }
+	    pc++
+	    
 	}
     }
 
@@ -86,10 +110,34 @@ export default class Doggolang {
 	}
 	// First token usually defines what is to be done
 	switch(tokens[0]) {
+	case "RUF?":
+	    let truthyExpression = []
+	    // "if" expression, we'll be lenient on a missing "then" (VUH)
+	    if(tokens[tokens.length-1] === "VUH") {
+		truthyExpression = tokens.slice(1, tokens.length-1)
+	    } else {
+		truthyExpression = tokens.slice(1, tokens.length-2)
+	    }
+	    if(!this.evaluate(truthyExpression)) {
+		// If false, skip up to and including the next "ROWH" or "ARRUF"
+		// (doesn't support nesting)
+		nextLine = this.skipAhead(pc, ["ROWH","ARRUF"])
+	    }
+	    break
+	case "ROWH":
+	    // If we execute into an else, we are surely in the "true" branch,
+	    // so we'll just skip until the ARRUF
+	    nextLine = this.skipAhead(pc, ["ARRUF"])
+	    break
+	case "ARRUF":
+	    // endif, basically a no-op. If we're running we are either in the true branch 
+	    // of an else-less if, or in the false branch. Either way, keep clam and carry on.
+	    break
+	    
 	    
 	default:
-	    // Not recognized as a reserved word, i.e. we have an identifier,
-	    // in which case we bounce off to the math expression evaluator
+	    // Not recognized as a reserved word, i.e. we have an identifier or a literal,
+	    // in which case we bounce off to the expression evaluator
 	    this.state.returnValue = this.evaluate(tokens)
 	    break
 	}
