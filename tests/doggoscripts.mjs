@@ -40,10 +40,9 @@ let doggoscripts = [
     }
 ]
 
-export default doggoscripts;
 
 // The script we need to get the correct answer for
-export let mystery_script = `
+let mystery_script = `
 samantha AWOO 1
 hooch AWOO 500
 einstein AWOO 10
@@ -65,3 +64,4 @@ BORF
 samantha`
 
 
+export {doggoscripts, mystery_script }

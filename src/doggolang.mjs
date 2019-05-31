@@ -76,6 +76,13 @@ export default class Doggolang {
 		break
 	    case "YAP":
 		return this.evaluate(tokens.slice(0,1)) > this.evaluate(tokens.slice(2))
+		break
+	    case "YIP":
+		return this.evaluate(tokens.slice(0,1)) < this.evaluate(tokens.slice(2))
+		break
+	    case "BARK":
+		return this.evaluate(tokens.slice(0,1)) - this.evaluate(tokens.slice(2))
+		break		
 	    default:
 		console.log("Unimplemented "+ tokens[1])
 		break
@@ -87,7 +94,7 @@ export default class Doggolang {
     // (used in if clauses...) and return the following adress
     skipAhead(pc, skipTo) {
 	if(this.trace) {
-	    console.log("skipTo: "+skipTo)
+	    console.log("skipAhead: "+skipTo)
 	}
 	while(pc<this.program.length) {
 	    let tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
@@ -95,6 +102,21 @@ export default class Doggolang {
 		return pc+1
 	    }
 	    pc++
+	    
+	}
+    }
+
+    // Jumps back to desired line and return its address, useful in loops
+    jumpBack(pc, skipTo) {
+	if(this.trace) {
+	    console.log("jumpBack: "+skipTo)
+	}
+	while(pc>0) {
+	    let tokens = this.program[pc].split(/\s+/).filter( (str) => str != '')
+	    if(skipTo.includes(tokens[0])) {
+		return pc
+	    }
+	    pc--
 	    
 	}
     }
@@ -108,10 +130,10 @@ export default class Doggolang {
 	if(tokens.length == 0) {
 	    return nextLine
 	}
+	let truthyExpression = []
 	// First token usually defines what is to be done
 	switch(tokens[0]) {
 	case "RUF?":
-	    let truthyExpression = []
 	    // "if" expression, we'll be lenient on a missing "then" (VUH)
 	    if(tokens[tokens.length-1] === "VUH") {
 		truthyExpression = tokens.slice(1, tokens.length-1)
@@ -133,8 +155,20 @@ export default class Doggolang {
 	    // endif, basically a no-op. If we're running we are either in the true branch 
 	    // of an else-less if, or in the false branch. Either way, keep clam and carry on.
 	    break
-	    
-	    
+
+	case "GRRR":
+	    // A while-loop?
+	    // Go ahead if condition is true, else skip past loop end	    
+	    truthyExpression = tokens.slice(1, tokens.length-1)
+	    if(!this.evaluate(truthyExpression)) {
+		nextLine = this.skipAhead(pc, ["BORF"])
+	    }
+	    break
+	case "BORF":
+	    // End of while loop, go back to top. This might even work with nested loops
+	    nextLine = this.jumpBack(pc, ["GRRR"])
+	    break
+
 	default:
 	    // Not recognized as a reserved word, i.e. we have an identifier or a literal,
 	    // in which case we bounce off to the expression evaluator
