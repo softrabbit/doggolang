@@ -24,9 +24,17 @@ export default class Doggolang {
 	    callStack: {},
 	    // for goto and maybe loops?
 	    labels: {},
-	    returnValue: undefined
-	    
+	    returnValue: undefined	    
 	}
+
+	this.operators = {
+	    "WOOF": (a,b) => {return a + b },
+	    "BARK": (a,b) => {return a - b },
+	    "ARF":  (a,b) => {return a * b },
+	    "YAP":  (a,b) => {return a > b },
+	    "YIP":  (a,b) => {return a < b }
+	}
+
     }
 
     // Add a line of code to the end of the program.    
@@ -59,33 +67,16 @@ export default class Doggolang {
 		this.state.memory[tokens[0]] : tokens[0]	    
 	    return Number(candidate) != NaN ? Number(candidate) : candidate
 	} else {
-	    switch(tokens[1]) {
-	    case "AWOO":
-		// Assignment operator
+	    if(tokens[1] === "AWOO") {
+		// Assignment operator...
 		this.state.memory[tokens[0]] = this.evaluate(tokens.slice(2))
-		// Assignment chaining should work, too
+		// ... with chaining, should one need it
 		return this.state.memory[tokens[0]]
-		break
-	    case "WOOF":
-		// Addition operator
-		return this.evaluate(tokens.slice(0,1)) + this.evaluate(tokens.slice(2))
-		break
-	    case "ARF":
-		// Multiplication operator
-		return this.evaluate(tokens.slice(0,1)) * this.evaluate(tokens.slice(2))
-		break
-	    case "YAP":
-		return this.evaluate(tokens.slice(0,1)) > this.evaluate(tokens.slice(2))
-		break
-	    case "YIP":
-		return this.evaluate(tokens.slice(0,1)) < this.evaluate(tokens.slice(2))
-		break
-	    case "BARK":
-		return this.evaluate(tokens.slice(0,1)) - this.evaluate(tokens.slice(2))
-		break		
-	    default:
+	    } else if(this.operators[tokens[1]]) {
+		
+		return this.operators[tokens[1]](this.evaluate(tokens.slice(0,1)), this.evaluate(tokens.slice(2)) )
+	    } else {
 		console.log("Unimplemented "+ tokens[1])
-		break
 	    }
 	}
     }
