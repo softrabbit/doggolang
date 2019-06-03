@@ -12,14 +12,16 @@ for(let k in doggoscripts) {
     }
     // D.trace = true
     let returnValue = D.run(0)
-    console.log("Test " + k + ": expected "+ doggoscripts[k].expect + ", got " + returnValue + " -- " + 
+    console.log(doggoscripts[k].name + ": expected "+ doggoscripts[k].expect + ", got " + returnValue + " -- " + 
 		(doggoscripts[k].expect == returnValue ? "SUCCESS" : "FAIL") )
     console.log("")
 } 
 
 
+/* For Wunderdog competition...
 let D = new Doggolang()
 for(let line of mystery_script.split(/\n/)) {
     D.addline(line)
 }
 console.log("Mystery script result: "+ D.run(0))
+*/

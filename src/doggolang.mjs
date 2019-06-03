@@ -122,18 +122,18 @@ export default class Doggolang {
 	    return nextLine
 	}
 	let truthyExpression = []
-	// First token usually defines what is to be done
+	// First token defines what is to be done
 	switch(tokens[0]) {
 	case "RUF?":
 	    // "if" expression, we'll be lenient on a missing "then" (VUH)
 	    if(tokens[tokens.length-1] === "VUH") {
 		truthyExpression = tokens.slice(1, tokens.length-1)
 	    } else {
-		truthyExpression = tokens.slice(1, tokens.length-2)
+		truthyExpression = tokens.slice(1, tokens.length)
 	    }
 	    if(!this.evaluate(truthyExpression)) {
 		// If false, skip up to and including the next "ROWH" or "ARRUF"
-		// (doesn't support nesting)
+		// (doesn't support nesting :( )
 		nextLine = this.skipAhead(pc, ["ROWH","ARRUF"])
 	    }
 	    break
