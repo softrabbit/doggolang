@@ -58,8 +58,14 @@ let doggoscripts = [
 	ARRUF
 	out`,
 	expect: 0
+    },
+    {
+	name: '3 + 2 * 5',
+	script: `out AWOO 3 WOOF 2 ARF 5
+	out`,
+	expect: 25 // Yes, stupid left-to-right arithmetic assumed
     }
-
+    
 ]
 
 
