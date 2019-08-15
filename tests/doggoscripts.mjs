@@ -1,4 +1,4 @@
-// Test cases from the original assignment
+// Test cases mostly from the original assignment
 let doggoscripts = [
     {
 	name: 'Assignment and plus',
@@ -65,7 +65,6 @@ let doggoscripts = [
 	out`,
 	expect: 25 // Yes, stupid left-to-right arithmetic assumed
     }
-    
 ]
 
 

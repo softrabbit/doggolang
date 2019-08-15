@@ -6,10 +6,28 @@ const ERRORED = 2;
 const TERMINATED = 3;
 
 // Doggolang interpreter, a pretty simplistic script runner environment
-// Assumptions so far from a quick look at the example code: 
+
+// Loose definition of syntax rules
 // - One statement per line
-// - Reserved word in UPPERCASE, variables in lower
+// - The only working data type is javascript's Number
 // - The last executed operation's value becomes the return value
+// - Math goes from left to right using operators +-*/, no precedence
+// - Loops or if clauses can not be nested inside the same kind
+
+// Short glossary:
+// AWOO - assignment
+// a WOOF b - addition
+// a BARK b - subtraction
+// a ARF b  - multiplication
+// a YAP b  - comparison, >
+// a YIP b  - comparison, <
+
+// RUF? [expression] VUH - if...then ("then" is optional)
+// ROWH  - else
+// ARRUF - endif
+// GRRR  - while
+// BORF  - endwhile
+
 export default class Doggolang {
 
     constructor() {
@@ -51,6 +69,9 @@ export default class Doggolang {
     // Evaluates a math expression, in tokens. 
     // Expressions are of the form (ident|literal) (op (ident|literal) )*
     evaluate(tokens) {
+	if(this.trace) {
+	    console.log("Eval: "+tokens.toString());
+	}
 	// Binary operators
 	const operators = {
 	    "WOOF": (a,b) => {return a + b; },
@@ -72,16 +93,20 @@ export default class Doggolang {
 		    candidate
 	    );
 	} else {
+	    // See if next to last is an operator, if this isn't an assignment
+	    let op_maybe = tokens[tokens.length-2]
 	    if(tokens[1] === "AWOO") {
-		// Assignment operator...
+		// Check assignments from left
 		this.state.memory[tokens[0]] = this.evaluate(tokens.slice(2));
-		// ... with chaining, should one need it
+		// ... and they are chainable, too!
 		return this.state.memory[tokens[0]];
-	    } else if(operators[tokens[1]]) {
-		// Handle an X op Y [op Z...] case, it's all left to right for now
-		return operators[tokens[1]](this.evaluate(tokens.slice(0,1)), this.evaluate(tokens.slice(2)) );
+	    } else if(operators[op_maybe]) {
+		// Handle an X op Y [op Z...] case, it's all left to right for now, 
+		// so we'll recurse from the right-hand side of the last operator, 
+		// like: A op1 B op2 C -> op2(op1(A,B),C)
+		return operators[op_maybe](this.evaluate(tokens.slice(0,tokens.length-2)), this.evaluate(tokens.slice(tokens.length-1)))
 	    } else {
-		console.log("Unimplemented "+ tokens[1]);
+		console.log("Trouble in ("+ tokens.toString()+")");
 	    }
 	}
     }
@@ -161,7 +186,7 @@ export default class Doggolang {
 	    }
 	    break;
 	case "BORF":
-	    // End of while loop, go back to top. This might even work with nested loops
+	    // End of while loop, go back to top. 
 	    nextLine = this.jumpBack(pc, ["GRRR"]);
 	    break;
 

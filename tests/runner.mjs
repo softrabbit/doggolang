@@ -10,7 +10,7 @@ for(let k in doggoscripts) {
     for(let line of doggoscripts[k].script.split(/\n/)) {
 	D.addline(line)
     }
-    // D.trace = true
+    //D.trace = true
     let returnValue = D.run(0)
     console.log(doggoscripts[k].name + ": expected "+ doggoscripts[k].expect + ", got " + returnValue + " -- " + 
 		(doggoscripts[k].expect == returnValue ? "SUCCESS" : "FAIL") )
